@@ -13,8 +13,9 @@ A minimalist, **blazingly fast** Neovim welcome screen plugin built with perform
 - 🎨 **Customizable**: User-defined ASCII art and keybinds
 - 🔧 **Zero Dependencies**: Pure Neovim APIs, no external plugins required
 - 🌙 **Modern**: Built with Neovim 0.11+ features (extmarks, modern APIs)
-- 💡 **Smart Defaults**: Works great out of the box
+- 💡 **Smart Defaults**: Works great out of the box, auto-opens on startup
 - 🎯 **Focused**: Does one thing well - welcome screen
+- 📺 **Fullscreen**: Clean fullscreen buffer with no statusline or tabline distractions
 
 ## 📸 Screenshots
 
@@ -53,7 +54,7 @@ A minimalist, **blazingly fast** Neovim welcome screen plugin built with perform
   lazy = false, -- Load on startup
   priority = 1000, -- Load before other plugins
   opts = {
-    -- your configuration here
+    -- Configuration here (auto_open is true by default)
   },
 }
 ```
@@ -87,7 +88,7 @@ require("namaste").setup()
 ```lua
 require("namaste").setup({
   -- Performance
-  auto_open = false,              -- Auto-open on startup
+  auto_open = true,               -- Auto-open on startup (default: true)
   single_instance = true,         -- Reuse buffer
   lazy_render = true,             -- Defer rendering
 
@@ -134,13 +135,6 @@ require("namaste").setup({
     icon = "@character",
     desc = "@string",
     footer = "@comment",
-  },
-
-  -- Window options
-  window = {
-    width = 0.8,    -- 80% of screen width
-    height = 0.8,   -- 80% of screen height
-    border = "rounded",
   },
 })
 ```

@@ -2,7 +2,7 @@ local M = {}
 
 M.defaults = {
   -- Performance
-  auto_open = false,
+  auto_open = true,
   single_instance = true,
   lazy_render = true, -- Defer rendering until visible
 
@@ -97,13 +97,6 @@ M.defaults = {
     icon = "@character",
     desc = "@string",
     footer = "@comment",
-  },
-
-  -- Window options
-  window = {
-    width = 0.8, -- Fraction of screen width
-    height = 0.8, -- Fraction of screen height
-    border = "rounded",
   },
 }
 

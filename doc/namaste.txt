@@ -62,7 +62,7 @@ namaste.nvim can be configured with the following options:
                                                           *namaste.auto_open*
 auto_open ~
     Type: `boolean`
-    Default: `false`
+    Default: `true`
 
     Whether to automatically open namaste on startup when no files are
     provided. Only opens if Neovim is started without arguments.
@@ -159,18 +159,6 @@ highlights ~
       • icon (string): Icon highlight group
       • desc (string): Description highlight group
       • footer (string): Footer highlight group
-
-                                                             *namaste.window*
-window ~
-    Type: `table`
-    Default: See below
-
-    Floating window configuration.
-
-    Fields:
-      • width (number): Fraction of screen width (default: 0.8)
-      • height (number): Fraction of screen height (default: 0.8)
-      • border (string): Border style (default: "rounded")
 
                                                   *namaste-default-sections*
 Default sections:

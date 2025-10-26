@@ -22,8 +22,7 @@ return {
   lazy = false,     -- Load on startup
   priority = 1000,  -- Load before other plugins
   opts = {
-    auto_open = true,
-    -- Add your configuration here
+    -- Configuration here (auto_open is true by default)
   },
 }
 ```
@@ -37,7 +36,7 @@ use {
   "abhilash26/namaste.nvim",
   config = function()
     require("namaste").setup({
-      auto_open = true,
+      -- Configuration here (auto_open is true by default)
     })
   end
 }
@@ -92,7 +91,7 @@ Add to your `init.lua`:
 
 ```lua
 require("namaste").setup({
-  auto_open = true,  -- Auto-open on startup
+  -- auto_open is true by default
 
   sections = {
     { key = "f", desc = "Find File", action = ":Telescope find_files<CR>" },

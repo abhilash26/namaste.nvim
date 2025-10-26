@@ -10,7 +10,8 @@ return {
   -- Auto-open on startup
   auto_open = function()
     require("namaste").setup({
-      auto_open = true,
+      -- auto_open is true by default, but you can disable it:
+      auto_open = false,
     })
   end,
 
@@ -86,7 +87,7 @@ return {
   -- Complete custom setup
   complete = function()
     require("namaste").setup({
-      auto_open = true,
+      -- auto_open is true by default
 
       header = function()
         local hour = tonumber(os.date("%H"))
@@ -138,12 +139,6 @@ return {
         section_padding = 1,
         footer_padding = 2,
       },
-
-      window = {
-        width = 0.8,
-        height = 0.8,
-        border = "rounded",
-      },
     })
   end,
 
@@ -153,7 +148,7 @@ return {
     lazy = false,
     priority = 1000,
     opts = {
-      auto_open = true,
+      -- auto_open is true by default
       -- Add your configuration here
     },
   },

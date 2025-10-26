@@ -21,30 +21,11 @@ function M.create_buffer()
   return buf
 end
 
--- Modern window creation with floating support
+-- Create fullscreen window (no floating)
 function M.create_window(buf)
-  local config = require("namaste.config").options
-  local ui = vim.api.nvim_list_uis()[1]
-
-  if not ui then
-    vim.notify("[namaste] No UI available", vim.log.levels.ERROR)
-    return nil
-  end
-
-  local width = math.floor(ui.width * config.window.width)
-  local height = math.floor(ui.height * config.window.height)
-
-  local win_config = {
-    relative = "editor",
-    width = width,
-    height = height,
-    col = math.floor((ui.width - width) / 2),
-    row = math.floor((ui.height - height) / 2),
-    style = "minimal",
-    border = config.window.border,
-  }
-
-  local win = vim.api.nvim_open_win(buf, true, win_config)
+  -- Switch to the buffer in current window
+  vim.api.nvim_set_current_buf(buf)
+  local win = vim.api.nvim_get_current_win()
 
   -- Modern window options (0.11+)
   vim.wo[win].cursorline = true
@@ -52,6 +33,12 @@ function M.create_window(buf)
   vim.wo[win].number = false
   vim.wo[win].relativenumber = false
   vim.wo[win].signcolumn = "no"
+  vim.wo[win].statusline = " " -- Empty statusline
+  vim.wo[win].statuscolumn = "" -- No status column
+
+  -- Hide cmdline and other UI elements for this buffer
+  vim.opt_local.laststatus = 0
+  vim.opt_local.showtabline = 0
 
   return win
 end
@@ -124,11 +111,15 @@ function M.create_or_show()
     end
   end
 
+  -- Save current laststatus and showtabline settings
+  local saved_laststatus = vim.o.laststatus
+  local saved_showtabline = vim.o.showtabline
+
   -- Create new buffer
   local buf = M.create_buffer()
   _state.buf_id = buf
 
-  -- Create window first to get proper dimensions
+  -- Create window (fullscreen)
   local win = M.create_window(buf)
   if not win then
     return
@@ -141,20 +132,44 @@ function M.create_or_show()
   -- Setup keymaps
   M.setup_keymaps(buf)
 
-  -- Set up autocmd for cleanup
+  -- Set up autocmds for cleanup and UI restoration
+  local augroup = vim.api.nvim_create_augroup("NamasteBuffer", { clear = true })
+
   vim.api.nvim_create_autocmd("BufWipeout", {
     buffer = buf,
+    group = augroup,
     once = true,
     callback = function()
       _state.buf_id = nil
       _state.win_id = nil
     end,
   })
+
+  -- Restore UI elements when leaving the buffer
+  vim.api.nvim_create_autocmd("BufLeave", {
+    buffer = buf,
+    group = augroup,
+    callback = function()
+      vim.o.laststatus = saved_laststatus
+      vim.o.showtabline = saved_showtabline
+    end,
+  })
+
+  -- Hide UI elements when entering the buffer
+  vim.api.nvim_create_autocmd("BufEnter", {
+    buffer = buf,
+    group = augroup,
+    callback = function()
+      vim.opt_local.laststatus = 0
+      vim.opt_local.showtabline = 0
+    end,
+  })
 end
 
 function M.close()
-  if _state.win_id and vim.api.nvim_win_is_valid(_state.win_id) then
-    vim.api.nvim_win_close(_state.win_id, true)
+  if _state.buf_id and vim.api.nvim_buf_is_valid(_state.buf_id) then
+    -- Delete the buffer (this will trigger BufWipeout and restore UI)
+    vim.api.nvim_buf_delete(_state.buf_id, { force = true })
   end
 end
 
