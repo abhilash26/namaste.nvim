@@ -33,12 +33,7 @@ function M.create_window(buf)
   vim.wo[win].number = false
   vim.wo[win].relativenumber = false
   vim.wo[win].signcolumn = "no"
-  vim.wo[win].statusline = " " -- Empty statusline
-  vim.wo[win].statuscolumn = "" -- No status column
-
-  -- Hide cmdline and other UI elements for this buffer
-  vim.opt_local.laststatus = 0
-  vim.opt_local.showtabline = 0
+  vim.wo[win].statusline = " " -- Empty statusline for THIS window only
 
   return win
 end
@@ -111,10 +106,6 @@ function M.create_or_show()
     end
   end
 
-  -- Save current laststatus and showtabline settings
-  local saved_laststatus = vim.o.laststatus
-  local saved_showtabline = vim.o.showtabline
-
   -- Create new buffer
   local buf = M.create_buffer()
   _state.buf_id = buf
@@ -132,7 +123,7 @@ function M.create_or_show()
   -- Setup keymaps
   M.setup_keymaps(buf)
 
-  -- Set up autocmds for cleanup and UI restoration
+  -- Set up autocmds for cleanup
   local augroup = vim.api.nvim_create_augroup("NamasteBuffer", { clear = true })
 
   vim.api.nvim_create_autocmd("BufWipeout", {
@@ -145,23 +136,34 @@ function M.create_or_show()
     end,
   })
 
-  -- Restore UI elements when leaving the buffer
-  vim.api.nvim_create_autocmd("BufLeave", {
-    buffer = buf,
-    group = augroup,
-    callback = function()
-      vim.o.laststatus = saved_laststatus
-      vim.o.showtabline = saved_showtabline
-    end,
-  })
-
-  -- Hide UI elements when entering the buffer
+  -- Hide tabline when entering namaste buffer (affects entire editor, but temporary)
   vim.api.nvim_create_autocmd("BufEnter", {
     buffer = buf,
     group = augroup,
     callback = function()
-      vim.opt_local.laststatus = 0
-      vim.opt_local.showtabline = 0
+      -- Store current values
+      if not _state.saved_showtabline then
+        _state.saved_showtabline = vim.o.showtabline
+        _state.saved_laststatus = vim.o.laststatus
+      end
+      -- Hide UI elements temporarily
+      vim.o.showtabline = 0
+      vim.o.laststatus = 0
+    end,
+  })
+
+  -- Restore UI elements when leaving namaste buffer
+  vim.api.nvim_create_autocmd("BufLeave", {
+    buffer = buf,
+    group = augroup,
+    callback = function()
+      -- Restore UI elements
+      if _state.saved_showtabline then
+        vim.o.showtabline = _state.saved_showtabline
+      end
+      if _state.saved_laststatus then
+        vim.o.laststatus = _state.saved_laststatus
+      end
     end,
   })
 end

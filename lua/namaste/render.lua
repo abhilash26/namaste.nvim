@@ -20,6 +20,14 @@ function M.center_text(text, width)
   return string.rep(" ", padding) .. text
 end
 
+-- Calculate vertical padding for centering
+function M.calculate_vertical_padding(total_lines, win_height)
+  if total_lines >= win_height then
+    return 0
+  end
+  return math.floor((win_height - total_lines) / 2)
+end
+
 -- Main render function using 0.11+ APIs
 function M.render(buf)
   local config = require("namaste.config").options
@@ -28,6 +36,10 @@ function M.render(buf)
   -- Build content
   local lines = {}
   local highlights = {}
+
+  -- Get window dimensions
+  local win_width = vim.api.nvim_win_get_width(0)
+  local win_height = vim.api.nvim_win_get_height(0)
 
   -- Add header
   local header = config.header
@@ -38,8 +50,35 @@ function M.render(buf)
     header = vim.split(header, "\n")
   end
 
-  local win_width = vim.api.nvim_win_get_width(0)
+  -- Count total content lines for vertical centering
+  local content_lines_count = #header
+    + config.spacing.header_padding
+    + (#config.sections * (1 + config.spacing.section_padding))
 
+  -- Add quote if enabled
+  if config.quote and config.quote.enabled then
+    content_lines_count = content_lines_count + 2 + config.spacing.quote_padding -- quote + author + padding
+  end
+
+  -- Add footer if present
+  local footer = config.footer
+  if type(footer) == "function" then
+    footer = footer()
+  end
+  if footer then
+    if type(footer) == "string" then
+      footer = vim.split(footer, "\n")
+    end
+    content_lines_count = content_lines_count + #footer + config.spacing.footer_padding
+  end
+
+  -- Add vertical padding to center content
+  local vertical_padding = M.calculate_vertical_padding(content_lines_count, win_height)
+  for _ = 1, vertical_padding do
+    table.insert(lines, "")
+  end
+
+  -- Add header
   for _, line in ipairs(header) do
     table.insert(lines, M.center_text(line, win_width))
   end
@@ -99,18 +138,48 @@ function M.render(buf)
     end
   end
 
-  -- Add footer
-  local footer = config.footer
-  if type(footer) == "function" then
-    footer = footer()
-  end
-  if footer then
-    for _ = 1, config.spacing.footer_padding do
+  -- Add quote if enabled
+  if config.quote and config.quote.enabled then
+    for _ = 1, config.spacing.quote_padding do
       table.insert(lines, "")
     end
 
-    if type(footer) == "string" then
-      footer = vim.split(footer, "\n")
+    local utils = require("namaste.utils")
+    local quote
+    if config.quote.custom_quotes and #config.quote.custom_quotes > 0 then
+      local random_index = math.random(1, #config.quote.custom_quotes)
+      quote = config.quote.custom_quotes[random_index]
+    else
+      quote = utils.get_random_quote()
+    end
+
+    local quote_text = '"' .. quote.text .. '"'
+    local author_text = "— " .. quote.author
+
+    local centered_quote = M.center_text(quote_text, win_width)
+    local centered_author = M.center_text(author_text, win_width)
+
+    table.insert(lines, centered_quote)
+    table.insert(highlights, {
+      line = #lines - 1,
+      col_start = 0,
+      col_end = -1,
+      hl_group = config.highlights.quote,
+    })
+
+    table.insert(lines, centered_author)
+    table.insert(highlights, {
+      line = #lines - 1,
+      col_start = 0,
+      col_end = -1,
+      hl_group = config.highlights.quote_author,
+    })
+  end
+
+  -- Add footer
+  if footer then
+    for _ = 1, config.spacing.footer_padding do
+      table.insert(lines, "")
     end
 
     for _, line in ipairs(footer) do
