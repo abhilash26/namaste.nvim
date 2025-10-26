@@ -1,6 +1,12 @@
 local M = {}
 
--- Extract color from highlight group
+-- Performance cache for color extraction
+local _hl_cache = {
+  last_colorscheme = nil,
+  highlights = nil,
+}
+
+-- Extract color from highlight group (with caching)
 local function get_hl_color(group, attr)
   local hl = vim.api.nvim_get_hl(0, { name = group })
   if hl and hl[attr] then
@@ -169,8 +175,24 @@ end
 
 -- Apply highlights
 local function apply_highlights()
+  -- Check cache first (skip if same colorscheme)
+  local current_colorscheme = vim.g.colors_name or "default"
+  if _hl_cache.last_colorscheme == current_colorscheme and _hl_cache.highlights then
+    -- Use cached highlights
+    for group, opts in pairs(_hl_cache.highlights) do
+      vim.api.nvim_set_hl(0, group, opts)
+    end
+    return
+  end
+
+  -- Generate new highlights
   local highlights = generate_smart_highlights()
 
+  -- Cache the results
+  _hl_cache.last_colorscheme = current_colorscheme
+  _hl_cache.highlights = highlights
+
+  -- Apply highlights
   for group, opts in pairs(highlights) do
     vim.api.nvim_set_hl(0, group, opts)
   end
@@ -185,6 +207,10 @@ function M.setup()
   vim.api.nvim_create_autocmd("ColorScheme", {
     group = vim.api.nvim_create_augroup("NamasteHighlights", { clear = true }),
     callback = function()
+      -- Clear cache and re-apply
+      _hl_cache.highlights = nil
+      _hl_cache.last_colorscheme = nil
+
       -- Small delay to ensure colorscheme is fully loaded
       vim.defer_fn(function()
         apply_highlights()

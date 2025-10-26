@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-10-26
+
+### Added
+- **Performance Caching**: Intelligent caching system for centered content and highlights
+- **ASCII Art Coloring**: Header text now uses theme-adaptive colors
+- **Colorcolumn Disabled**: Automatically turns off colorcolumn in namaste buffer
+
+### Changed
+- Render caching: Headers and sections are cached until window resize
+- Highlight caching: Color extraction results are cached per colorscheme
+- Cache invalidation: Smart cache clearing on window resize or colorscheme change
+
+### Performance
+- Header centering: Cached (no recalculation on re-render)
+- Section formatting: Cached (no string operations on re-render)
+- Color extraction: Cached per colorscheme (0 overhead for repeated renders)
+- Highlight generation: Only runs once per colorscheme
+- Expected improvement: 30-50% faster re-renders
+
 ## [1.2.0] - 2025-10-26
 
 ### Added

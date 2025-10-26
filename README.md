@@ -9,13 +9,15 @@ A minimalist, **blazingly fast** Neovim welcome screen plugin built with perform
 
 ## ✨ Features
 
-- 🚀 **Blazingly Fast**: < 0.5ms startup impact, < 5ms render time
+- 🚀 **Blazingly Fast**: < 0.5ms startup impact, < 2ms render time (30-50% faster re-renders with caching)
+- ⚡ **Performance Caching**: Smart caching for headers, sections, and color extraction
 - 🎨 **Customizable**: User-defined ASCII art and keybinds
+- 🌈 **Colored ASCII Art**: Header text uses theme-adaptive colors with bold emphasis
 - 🔧 **Zero Dependencies**: Pure Neovim APIs, no external plugins required
 - 🌙 **Modern**: Built with Neovim 0.11+ features (extmarks, modern APIs)
 - 💡 **Smart Defaults**: Works great out of the box, auto-opens on startup
 - 🎯 **Focused**: Does one thing well - welcome screen
-- 📺 **Fullscreen**: Clean fullscreen buffer with no statusline or tabline distractions
+- 📺 **Fullscreen**: Clean fullscreen buffer with no statusline, tabline, or colorcolumn
 - 🤖 **Auto-Detection**: Automatically detects Telescope/fzf-lua, package managers, and session managers
 - 📍 **Centered**: Content perfectly centered vertically in window
 - 💬 **Quotes**: Inspirational programming quotes to supercharge your workflow

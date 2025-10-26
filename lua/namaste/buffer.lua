@@ -33,6 +33,7 @@ function M.create_window(buf)
   vim.wo[win].number = false
   vim.wo[win].relativenumber = false
   vim.wo[win].signcolumn = "no"
+  vim.wo[win].colorcolumn = "" -- Turn off colorcolumn
   vim.wo[win].statusline = " " -- Empty statusline for THIS window only
 
   return win
