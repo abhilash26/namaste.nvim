@@ -1,6 +1,9 @@
 local M = {}
 
 M.defaults = {
+  -- Theme selection (can be "startify", "dashboard", or nil for custom)
+  theme = nil, -- nil = use custom config below
+
   -- Performance
   auto_open = true,
   single_instance = true,
@@ -153,6 +156,24 @@ end
 -- Use vim.validate for thorough checking
 function M.setup(opts)
   opts = opts or {}
+
+  -- If theme is specified, load theme config first
+  if opts.theme then
+    local theme_ok, theme = pcall(require, "namaste.themes." .. opts.theme)
+    if theme_ok and theme.config then
+      local theme_config = theme.config()
+      -- Merge theme config with user opts, user opts take precedence
+      opts = vim.tbl_deep_extend("force", theme_config, opts)
+      -- Remove theme key from opts to avoid confusion
+      opts.theme = nil
+    else
+      vim.notify(
+        string.format("namaste.nvim: Theme '%s' not found, using defaults", opts.theme),
+        vim.log.levels.WARN
+      )
+      opts.theme = nil
+    end
+  end
 
   vim.validate({
     auto_open = { opts.auto_open, "boolean", true },

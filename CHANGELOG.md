@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-10-26
+
+### Added - Theme System
+- **Built-in Themes**: Two beautiful themes inspired by alpha-nvim
+  - `startify`: Workflow-focused minimal layout (vim-startify inspired)
+  - `dashboard`: Beautiful spacious layout (dashboard-nvim inspired)
+- **Theme Configuration**: Use `theme = "startify"` or `theme = "dashboard"` in setup
+- **Theme Customization**: Override specific theme parts while keeping the base
+- **Theme Auto-loading**: Themes provide sensible defaults for all options
+- **Theme Examples**: Comprehensive theme examples in `theme_examples.lua`
+
+### Changed
+- Config system now supports theme loading before user customization
+- Theme configs are deep-merged with user opts (user takes precedence)
+- Added theme comparison table to README
+- Enhanced documentation with theme usage examples
+
+### New Files
+- `lua/namaste/themes/startify.lua`: vim-startify inspired theme
+- `lua/namaste/themes/dashboard.lua`: dashboard-nvim inspired theme
+- `theme_examples.lua`: Comprehensive theme usage examples
+
 ## [1.4.0] - 2025-10-26
 
 ### Added - Inspired by Popular Plugins

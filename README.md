@@ -12,6 +12,7 @@ A minimalist, **blazingly fast** Neovim welcome screen plugin built with perform
 - 🚀 **Blazingly Fast**: < 0.5ms startup impact, < 2ms render time (30-50% faster re-renders with caching)
 - ⚡ **Performance Caching**: Smart caching for headers, sections, and color extraction
 - 🎨 **Customizable**: User-defined ASCII art and keybinds
+- 🎭 **Built-in Themes**: Choose from `startify` (workflow-focused) or `dashboard` (beautiful) themes
 - 🌈 **Colored ASCII Art**: Header text uses theme-adaptive colors with bold emphasis
 - 📁 **MRU Files**: Display Most Recently Used files with quick access (vim-startify inspired)
 - 🔢 **Number Shortcuts**: Press 1-9 to instantly open MRU files (dashboard-nvim style)
@@ -56,6 +57,36 @@ A minimalist, **blazingly fast** Neovim welcome screen plugin built with perform
 
 ## 🚀 Installation
 
+### Quick Start with Themes
+
+Choose from two beautiful built-in themes:
+
+#### 🗂️ Startify Theme (Workflow-Focused)
+```lua
+-- With lazy.nvim
+{
+  "abhilash26/namaste.nvim",
+  lazy = false,
+  priority = 1000,
+  opts = {
+    theme = "startify", -- vim-startify inspired
+  },
+}
+```
+
+#### 🎨 Dashboard Theme (Beautiful)
+```lua
+-- With lazy.nvim
+{
+  "abhilash26/namaste.nvim",
+  lazy = false,
+  priority = 1000,
+  opts = {
+    theme = "dashboard", -- dashboard-nvim inspired
+  },
+}
+```
+
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
@@ -65,6 +96,7 @@ A minimalist, **blazingly fast** Neovim welcome screen plugin built with perform
   priority = 1000, -- Load before other plugins
   opts = {
     -- Configuration here (auto_open is true by default)
+    -- theme = "startify", -- Optional: use built-in theme
   },
 }
 ```
@@ -115,6 +147,81 @@ namaste.nvim intelligently detects your setup and adapts automatically:
 **No configuration needed!** Just install the plugin and it adapts to your setup.
 
 ## ⚙️ Configuration
+
+### 🎭 Theme System
+
+namaste.nvim includes two beautiful built-in themes inspired by [alpha-nvim](https://github.com/goolord/alpha-nvim):
+
+#### 🗂️ Startify Theme
+
+Minimal, workflow-focused layout inspired by [vim-startify](https://github.com/mhinz/vim-startify).
+
+**Features:**
+- ✓ Compact spacing
+- ✓ 10 MRU files (quick access with number keys)
+- ✓ 5 recent sessions
+- ✓ Minimal sections (focused on workflow)
+- ✓ No quotes (distraction-free)
+
+```lua
+require("namaste").setup({
+  theme = "startify",
+})
+```
+
+#### 🎨 Dashboard Theme
+
+Beautiful, spacious layout inspired by [dashboard-nvim](https://github.com/nvimdev/dashboard-nvim).
+
+**Features:**
+- ✓ Spacious layout with generous padding
+- ✓ Hyper logo ASCII art
+- ✓ Inspirational quotes
+- ✓ 5 MRU files with icons
+- ✓ Rich action buttons
+- ✓ Package manager integration
+
+```lua
+require("namaste").setup({
+  theme = "dashboard",
+})
+```
+
+#### 🎛️ Theme Comparison
+
+| Feature | Startify | Dashboard | Custom (nil) |
+|---------|----------|-----------|--------------|
+| ASCII Art | Simple | Beautiful | Your choice |
+| MRU Files | 10 | 5 | 5 |
+| Sessions | Yes | No | No |
+| Quotes | No | Yes | Yes |
+| Spacing | Compact | Spacious | Normal |
+| Focus | Workflow | Beauty | Balanced |
+| Sections | 3 | 8 | Auto-detect |
+
+#### 🔧 Theme Customization
+
+You can start with a theme and override specific parts:
+
+```lua
+require("namaste").setup({
+  theme = "dashboard", -- Start with dashboard theme
+
+  -- Override specific parts
+  header = function()
+    return {
+      "  ╔══════════════════════════════╗",
+      "  ║   MY CUSTOM NEOVIM SETUP   ║",
+      "  ╚══════════════════════════════╝",
+    }
+  end,
+
+  mru_limit = 10, -- Show more MRU files
+  show_sessions = true, -- Add sessions to dashboard
+})
+```
+
+See [`theme_examples.lua`](./theme_examples.lua) for more examples!
 
 ### Default Configuration
 
