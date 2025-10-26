@@ -1,0 +1,20 @@
+# Neovim
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Lua
+luac.out
+
+# Testing
+.tests/
+tests/
+
+# Documentation builds
+doc/tags
+
+# Development
+.luarc.json
+.stylua.toml.bak
+

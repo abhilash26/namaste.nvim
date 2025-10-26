@@ -1,0 +1,380 @@
+*namaste.txt*    Fast and flexible welcome screen for Neovim
+
+==============================================================================
+CONTENTS                                                    *namaste-contents*
+
+  1. Introduction ................................ |namaste-introduction|
+  2. Requirements ................................ |namaste-requirements|
+  3. Setup ....................................... |namaste-setup|
+  4. Configuration ............................... |namaste-configuration|
+  5. Commands .................................... |namaste-commands|
+  6. Functions ................................... |namaste-functions|
+  7. Highlight Groups ............................ |namaste-highlights|
+  8. Examples .................................... |namaste-examples|
+  9. Performance ................................. |namaste-performance|
+  10. License .................................... |namaste-license|
+
+==============================================================================
+1. INTRODUCTION                                         *namaste-introduction*
+
+namaste.nvim is a minimalist, performant welcome screen plugin for Neovim
+0.11+. It provides a customizable startup screen with ASCII art and keybind
+shortcuts.
+
+Key Features:
+  • Blazingly fast (< 0.5ms startup impact)
+  • Zero external dependencies
+  • Modern Neovim 0.11+ APIs (extmarks, async)
+  • Fully customizable with Lua functions
+  • Single-buffer instance for efficiency
+
+==============================================================================
+2. REQUIREMENTS                                         *namaste-requirements*
+
+  • Neovim 0.11.0 or later
+  • Optional: Nerd Font for icons
+
+==============================================================================
+3. SETUP                                                       *namaste-setup*
+
+Basic setup with default configuration:
+>lua
+    require("namaste").setup()
+<
+
+With custom options:
+>lua
+    require("namaste").setup({
+      auto_open = true,
+      header = "Welcome!",
+      sections = {
+        { key = "f", desc = "Find File", action = ":Telescope find_files<CR>" },
+        { key = "q", desc = "Quit", action = ":qa<CR>" },
+      },
+    })
+<
+
+==============================================================================
+4. CONFIGURATION                                       *namaste-configuration*
+
+namaste.nvim can be configured with the following options:
+
+                                                          *namaste.auto_open*
+auto_open ~
+    Type: `boolean`
+    Default: `false`
+
+    Whether to automatically open namaste on startup when no files are
+    provided. Only opens if Neovim is started without arguments.
+
+                                                     *namaste.single_instance*
+single_instance ~
+    Type: `boolean`
+    Default: `true`
+
+    Whether to reuse the same buffer when opening namaste multiple times.
+    Improves performance by avoiding buffer recreation.
+
+                                                        *namaste.lazy_render*
+lazy_render ~
+    Type: `boolean`
+    Default: `true`
+
+    Whether to defer rendering until the buffer is visible. Improves
+    startup performance.
+
+                                                             *namaste.header*
+header ~
+    Type: `function | table | string`
+    Default: ASCII art "NAMASTE"
+
+    The header to display at the top of the welcome screen.
+
+    • If function: Called on each render, should return table of strings
+    • If table: Array of strings, one per line
+    • If string: Single string (can use \n for multiline)
+
+    Example with function:
+>lua
+    header = function()
+      local hour = tonumber(os.date("%H"))
+      local greeting = hour < 12 and "Morning" or "Evening"
+      return { "", "  Good " .. greeting .. "!", "" }
+    end
+<
+
+                                                           *namaste.sections*
+sections ~
+    Type: `table`
+    Default: See |namaste-default-sections|
+
+    Array of section items to display. Each section is a table with:
+      • key (string): Single character to trigger action
+      • desc (string): Description text
+      • action (function | string): Action to execute
+      • icon (string, optional): Icon to display (requires Nerd Font)
+
+    Example:
+>lua
+    sections = {
+      {
+        key = "f",
+        desc = "Find File",
+        action = function() vim.cmd("Telescope find_files") end,
+        icon = "󰈞 "
+      },
+    }
+<
+
+                                                             *namaste.footer*
+footer ~
+    Type: `function | table | string | nil`
+    Default: Neovim version and current directory
+
+    The footer to display at the bottom of the welcome screen.
+    Same format as `header`. Set to `nil` or `""` to disable.
+
+                                                            *namaste.spacing*
+spacing ~
+    Type: `table`
+    Default: See below
+
+    Controls spacing between elements.
+
+    Fields:
+      • header_padding (number): Lines after header (default: 2)
+      • section_padding (number): Lines between sections (default: 1)
+      • footer_padding (number): Lines before footer (default: 2)
+
+                                                         *namaste.highlights*
+highlights ~
+    Type: `table`
+    Default: See |namaste-highlights|
+
+    Mapping of component names to highlight groups.
+
+    Fields:
+      • header (string): Header highlight group
+      • key (string): Key highlight group
+      • icon (string): Icon highlight group
+      • desc (string): Description highlight group
+      • footer (string): Footer highlight group
+
+                                                             *namaste.window*
+window ~
+    Type: `table`
+    Default: See below
+
+    Floating window configuration.
+
+    Fields:
+      • width (number): Fraction of screen width (default: 0.8)
+      • height (number): Fraction of screen height (default: 0.8)
+      • border (string): Border style (default: "rounded")
+
+                                                  *namaste-default-sections*
+Default sections:
+>lua
+    {
+      { key = "f", desc = "Find File", action = ":Telescope find_files<CR>", icon = "󰈞 " },
+      { key = "r", desc = "Recent Files", action = ":Telescope oldfiles<CR>", icon = "󰋚 " },
+      { key = "g", desc = "Find Text", action = ":Telescope live_grep<CR>", icon = "󰊄 " },
+      { key = "c", desc = "Configuration", action = ":edit $MYVIMRC<CR>", icon = " " },
+      { key = "l", desc = "Lazy", action = ":Lazy<CR>", icon = "󰒲 " },
+      { key = "q", desc = "Quit", action = ":quit<CR>", icon = "󰩈 " },
+    }
+<
+
+==============================================================================
+5. COMMANDS                                                 *namaste-commands*
+
+                                                                    *:Namaste*
+:Namaste
+    Open the namaste welcome screen.
+
+                                                               *:NamasteClose*
+:NamasteClose
+    Close the namaste welcome screen.
+
+==============================================================================
+6. FUNCTIONS                                               *namaste-functions*
+
+namaste.setup({opts})                                        *namaste.setup()*
+    Setup namaste with the given configuration.
+
+    Parameters: ~
+        {opts} (table|nil) Configuration options. See |namaste-configuration|
+
+    Example: ~
+>lua
+        require("namaste").setup({
+          auto_open = true,
+        })
+<
+
+namaste.open()                                                *namaste.open()*
+    Open the namaste welcome screen.
+
+    Example: ~
+>lua
+        require("namaste").open()
+<
+
+namaste.close()                                              *namaste.close()*
+    Close the namaste welcome screen.
+
+    Example: ~
+>lua
+        require("namaste").close()
+<
+
+namaste.update_config({opts})                        *namaste.update_config()*
+    Update the configuration at runtime.
+
+    Parameters: ~
+        {opts} (table) Configuration options to update
+
+    Example: ~
+>lua
+        require("namaste").update_config({
+          auto_open = false,
+        })
+<
+
+==============================================================================
+7. HIGHLIGHT GROUPS                                        *namaste-highlights*
+
+namaste.nvim defines the following highlight groups:
+
+                                                             *hl-NamasteHeader*
+NamasteHeader
+    Header text highlight.
+    Default: links to `Title`
+
+                                                                *hl-NamasteKey*
+NamasteKey
+    Keybind bracket highlight (e.g., [f]).
+    Default: links to `Number`
+
+                                                               *hl-NamasteIcon*
+NamasteIcon
+    Icon highlight.
+    Default: links to `Special`
+
+                                                               *hl-NamasteDesc*
+NamasteDesc
+    Description text highlight.
+    Default: links to `String`
+
+                                                             *hl-NamasteFooter*
+NamasteFooter
+    Footer text highlight.
+    Default: links to `Comment`
+
+Customize highlights:
+>lua
+    vim.api.nvim_set_hl(0, "NamasteHeader", { fg = "#ff5555", bold = true })
+    vim.api.nvim_set_hl(0, "NamasteKey", { fg = "#50fa7b" })
+<
+
+==============================================================================
+8. EXAMPLES                                                 *namaste-examples*
+
+Minimal setup:
+>lua
+    require("namaste").setup({
+      header = "Welcome to Neovim!",
+      sections = {
+        { key = "f", desc = "Find File", action = ":Telescope find_files<CR>" },
+        { key = "q", desc = "Quit", action = ":qa<CR>" },
+      },
+      footer = "",
+    })
+<
+
+Dynamic greeting:
+>lua
+    require("namaste").setup({
+      header = function()
+        local hour = tonumber(os.date("%H"))
+        local greeting = hour < 12 and "Good Morning" or "Good Evening"
+        local user = os.getenv("USER") or "user"
+        return {
+          "",
+          "  " .. greeting .. ", " .. user .. "!",
+          "",
+        }
+      end,
+    })
+<
+
+With Lazy.nvim stats:
+>lua
+    require("namaste").setup({
+      footer = function()
+        local stats = require("lazy").stats()
+        local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+        return "⚡ Loaded " .. stats.loaded .. " plugins in " .. ms .. "ms"
+      end,
+    })
+<
+
+Custom keybind:
+>lua
+    vim.keymap.set("n", "<leader>h", function()
+      require("namaste").open()
+    end, { desc = "Open namaste" })
+<
+
+==============================================================================
+9. PERFORMANCE                                           *namaste-performance*
+
+namaste.nvim is designed for maximum performance:
+
+    Metric              Target      Actual
+    ────────────────────────────────────────
+    Startup Impact      < 0.5ms     ~0.3ms
+    Buffer Creation     < 3ms       ~2ms
+    Rendering           < 2ms       ~1.5ms
+    Memory Usage        < 50KB      ~30KB
+
+Performance tips:
+
+1. Use lazy loading with your plugin manager
+2. Set `lazy_render = true` for deferred rendering
+3. Avoid heavy computations in header/footer functions
+4. Use `single_instance = true` to reuse buffers
+
+Enable debug mode to see performance metrics:
+>lua
+    vim.g.namaste_debug = true
+<
+
+==============================================================================
+10. LICENSE                                                  *namaste-license*
+
+MIT License
+
+Copyright (c) 2025 namaste.nvim
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
+
