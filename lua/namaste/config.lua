@@ -6,6 +6,12 @@ M.defaults = {
   single_instance = true,
   lazy_render = true, -- Defer rendering until visible
 
+  -- Content display options (inspired by vim-startify & dashboard-nvim)
+  show_mru = true, -- Show Most Recently Used files
+  mru_limit = 5, -- Number of MRU files to show
+  show_sessions = false, -- Show available sessions
+  session_limit = 3, -- Number of sessions to show
+
   -- ASCII Art (function support for dynamic content)
   header = function()
     return {
@@ -33,13 +39,14 @@ M.defaults = {
   -- Footer with dynamic content
   footer = function()
     local version = vim.version()
-    local stats = vim.fn.getcwd()
+    local utils = require("namaste.utils")
+    local project = utils.get_project_name()
     return string.format(
       "Neovim v%d.%d.%d | %s",
       version.major,
       version.minor,
       version.patch,
-      vim.fn.fnamemodify(stats, ":t")
+      project
     )
   end,
 
@@ -49,6 +56,8 @@ M.defaults = {
     section_padding = 1,
     footer_padding = 2,
     quote_padding = 2, -- Space before footer
+    mru_padding = 1, -- Space between MRU items
+    sessions_padding = 1, -- Space between session items
   },
 
   -- Modern highlight groups (0.11+ supports @markup.*)
@@ -60,6 +69,13 @@ M.defaults = {
     footer = "@comment",
     quote = "@comment.note",
     quote_author = "@comment",
+    mru_title = "@markup.strong",
+    mru_icon = "@character",
+    mru_path = "@string.special.path",
+    mru_number = "@number",
+    sessions_title = "@markup.strong",
+    sessions_icon = "@character",
+    sessions_name = "@string",
   },
 }
 

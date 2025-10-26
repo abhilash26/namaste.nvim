@@ -38,6 +38,119 @@ function M.execute_action(action)
   end
 end
 
+-- Get MRU (Most Recently Used) files
+-- Inspired by vim-startify
+function M.get_mru_files(count)
+  count = count or 5
+  local oldfiles = vim.v.oldfiles or {}
+  local mru = {}
+  local cwd = vim.fn.getcwd()
+  local seen = {}
+
+  for _, file in ipairs(oldfiles) do
+    -- Skip duplicates
+    if not seen[file] then
+      seen[file] = true
+
+      -- Only include files that exist and are readable
+      if vim.fn.filereadable(file) == 1 then
+        -- Prefer files in current directory
+        local is_in_cwd = file:find(cwd, 1, true) == 1
+
+        table.insert(mru, {
+          path = file,
+          display = vim.fn.fnamemodify(file, ":~:."),
+          in_cwd = is_in_cwd,
+        })
+
+        if #mru >= count * 2 then
+          break
+        end
+      end
+    end
+  end
+
+  -- Sort: files in cwd first
+  table.sort(mru, function(a, b)
+    if a.in_cwd ~= b.in_cwd then
+      return a.in_cwd
+    end
+    return false
+  end)
+
+  -- Return only count items
+  local result = {}
+  for i = 1, math.min(count, #mru) do
+    table.insert(result, mru[i])
+  end
+
+  return result
+end
+
+-- Detect project root
+-- Inspired by dashboard-nvim
+function M.get_project_root()
+  local markers = { ".git", "package.json", "Cargo.toml", "go.mod", "pyproject.toml", "Makefile" }
+  local cwd = vim.fn.getcwd()
+
+  -- Check current directory first
+  for _, marker in ipairs(markers) do
+    if vim.fn.filereadable(cwd .. "/" .. marker) == 1 or vim.fn.isdirectory(cwd .. "/" .. marker) == 1 then
+      return cwd
+    end
+  end
+
+  -- Check parent directories
+  local path = vim.fn.expand("%:p:h")
+  while path ~= "/" do
+    for _, marker in ipairs(markers) do
+      local marker_path = path .. "/" .. marker
+      if vim.fn.filereadable(marker_path) == 1 or vim.fn.isdirectory(marker_path) == 1 then
+        return path
+      end
+    end
+    path = vim.fn.fnamemodify(path, ":h")
+  end
+
+  return cwd
+end
+
+-- Get project name
+function M.get_project_name()
+  local root = M.get_project_root()
+  return vim.fn.fnamemodify(root, ":t")
+end
+
+-- Find sessions
+-- Inspired by vim-startify
+function M.find_sessions()
+  local session_dir = vim.fn.stdpath("data") .. "/sessions"
+
+  -- Create session directory if it doesn't exist
+  if vim.fn.isdirectory(session_dir) == 0 then
+    vim.fn.mkdir(session_dir, "p")
+  end
+
+  local sessions = {}
+  local files = vim.fn.glob(session_dir .. "/*.vim", false, true)
+
+  for _, file in ipairs(files) do
+    local name = vim.fn.fnamemodify(file, ":t:r")
+    table.insert(sessions, {
+      name = name,
+      path = file,
+      modified = vim.fn.getftime(file),
+    })
+  end
+
+  -- Sort by modification time (newest first)
+  table.sort(sessions, function(a, b)
+    return a.modified > b.modified
+  end)
+
+  return sessions
+end
+
 -- Auto-detect fuzzy finder (Telescope or fzf-lua)
 function M.detect_finder()
   -- Check for Telescope

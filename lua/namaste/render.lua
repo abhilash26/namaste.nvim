@@ -26,6 +26,16 @@ function M.get_sections_start_line()
   return _cache.sections_start_line
 end
 
+-- Get MRU lines mapping (for keybind navigation)
+function M.get_mru_lines()
+  return _cache.mru_lines
+end
+
+-- Get session lines mapping (for keybind navigation)
+function M.get_session_lines()
+  return _cache.session_lines
+end
+
 -- Center text helper
 function M.center_text(text, width)
   local text_width = vim.fn.strdisplaywidth(text)
@@ -184,6 +194,135 @@ function M.render(buf)
     -- Add spacing
     for _ = 1, config.spacing.section_padding do
       table.insert(lines, "")
+    end
+  end
+
+  -- Add MRU files (inspired by vim-startify)
+  if config.show_mru then
+    local utils = require("namaste.utils")
+    local mru_files = utils.get_mru_files(config.mru_limit)
+
+    if #mru_files > 0 then
+      for _ = 1, config.spacing.mru_padding do
+        table.insert(lines, "")
+      end
+
+      -- MRU title
+      local mru_title = "  Recent Files"
+      table.insert(lines, M.center_text(mru_title, win_width))
+      table.insert(highlights, {
+        line = #lines - 1,
+        col_start = 0,
+        col_end = -1,
+        hl_group = "NamasteMRUTitle",
+      })
+
+      table.insert(lines, "")
+
+      -- MRU items
+      for i, file in ipairs(mru_files) do
+        local number = string.format("%d", i)
+        local icon = "󰈙"
+        local display = file.display
+
+        -- Limit display path length
+        if #display > 40 then
+          display = "..." .. display:sub(-37)
+        end
+
+        local mru_line = string.format("  %s %s  %s", icon, number, display)
+        local centered = M.center_text(mru_line, win_width)
+        table.insert(lines, centered)
+
+        -- Store line for keybind mapping
+        if not _cache.mru_lines then
+          _cache.mru_lines = {}
+        end
+        _cache.mru_lines[#lines] = file.path
+
+        -- Highlight
+        local icon_pos = centered:find(icon)
+        local num_pos = centered:find(number, icon_pos)
+        if icon_pos and num_pos then
+          table.insert(highlights, {
+            line = #lines - 1,
+            col_start = icon_pos - 1,
+            col_end = icon_pos,
+            hl_group = "NamasteMRUIcon",
+          })
+          table.insert(highlights, {
+            line = #lines - 1,
+            col_start = num_pos - 1,
+            col_end = num_pos,
+            hl_group = "NamasteMRUNumber",
+          })
+          table.insert(highlights, {
+            line = #lines - 1,
+            col_start = num_pos + 2,
+            col_end = -1,
+            hl_group = "NamasteMRUPath",
+          })
+        end
+      end
+    end
+  end
+
+  -- Add sessions (inspired by vim-startify)
+  if config.show_sessions then
+    local utils = require("namaste.utils")
+    local sessions = utils.find_sessions()
+
+    if #sessions > 0 then
+      for _ = 1, config.spacing.sessions_padding do
+        table.insert(lines, "")
+      end
+
+      -- Sessions title
+      local sessions_title = "  Sessions"
+      table.insert(lines, M.center_text(sessions_title, win_width))
+      table.insert(highlights, {
+        line = #lines - 1,
+        col_start = 0,
+        col_end = -1,
+        hl_group = "NamasteSessionsTitle",
+      })
+
+      table.insert(lines, "")
+
+      -- Session items (limited)
+      local max_sessions = math.min(#sessions, config.session_limit)
+      for i = 1, max_sessions do
+        local session = sessions[i]
+        local icon = ""
+        local name = session.name
+
+        local session_line = string.format("  %s  %s", icon, name)
+        local centered = M.center_text(session_line, win_width)
+        table.insert(lines, centered)
+
+        -- Store line for keybind mapping
+        if not _cache.session_lines then
+          _cache.session_lines = {}
+        end
+        _cache.session_lines[#lines] = session.path
+
+        -- Highlight
+        local icon_pos = centered:find(icon)
+        if icon_pos then
+          table.insert(highlights, {
+            line = #lines - 1,
+            col_start = icon_pos - 1,
+            col_end = icon_pos + 1,
+            hl_group = "NamasteSessionsIcon",
+          })
+          table.insert(highlights, {
+            line = #lines - 1,
+            col_start = icon_pos + 3,
+            col_end = -1,
+            hl_group = "NamasteSessionsName",
+          })
+        end
+      end
     end
   end
 

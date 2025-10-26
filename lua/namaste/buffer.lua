@@ -75,9 +75,11 @@ function M.setup_keymaps(buf)
   -- Enter to execute action on current line
   vim.keymap.set("n", "<CR>", function()
     local line = vim.fn.line(".")
-    local sections_start = require("namaste.render").get_sections_start_line()
+    local render = require("namaste.render")
+    local sections_start = render.get_sections_start_line()
     local section_idx = line - sections_start + 1
 
+    -- Check if it's a section line
     if section_idx > 0 and section_idx <= #config.sections then
       local section = config.sections[section_idx]
       M.close()
@@ -88,12 +90,62 @@ function M.setup_keymaps(buf)
           vim.cmd(section.action)
         end
       end)
+      return
+    end
+
+    -- Check if it's an MRU file line (inspired by vim-startify)
+    local mru_lines = render.get_mru_lines()
+    if mru_lines and mru_lines[line] then
+      M.close()
+      vim.schedule(function()
+        vim.cmd("edit " .. vim.fn.fnameescape(mru_lines[line]))
+      end)
+      return
+    end
+
+    -- Check if it's a session line (inspired by vim-startify)
+    local session_lines = render.get_session_lines()
+    if session_lines and session_lines[line] then
+      M.close()
+      vim.schedule(function()
+        vim.cmd("source " .. vim.fn.fnameescape(session_lines[line]))
+      end)
+      return
     end
   end, {
     buffer = buf,
     silent = true,
     desc = "Execute action",
   })
+
+  -- Number keys 1-9 to quickly open MRU files (dashboard-nvim style)
+  for i = 1, 9 do
+    vim.keymap.set("n", tostring(i), function()
+      local render = require("namaste.render")
+      local mru_lines = render.get_mru_lines()
+      if mru_lines then
+        local target_line = nil
+        local count = 0
+        for line_num, _ in pairs(mru_lines) do
+          count = count + 1
+          if count == i then
+            target_line = line_num
+            break
+          end
+        end
+        if target_line then
+          M.close()
+          vim.schedule(function()
+            vim.cmd("edit " .. vim.fn.fnameescape(mru_lines[target_line]))
+          end)
+        end
+      end
+    end, {
+      buffer = buf,
+      silent = true,
+      desc = "Open MRU file " .. i,
+    })
+  end
 end
 
 -- Main entry point

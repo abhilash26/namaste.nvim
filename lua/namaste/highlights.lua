@@ -170,6 +170,55 @@ local function generate_smart_highlights()
     highlights.NamasteQuoteAuthor = { link = "Comment" }
   end
 
+  -- MRU Title: Bold title color (inspired by vim-startify)
+  if title_fg then
+    highlights.NamasteMRUTitle = { fg = title_fg, bold = true }
+  else
+    highlights.NamasteMRUTitle = { link = "Title" }
+  end
+
+  -- MRU Icon: Use special color
+  if special_fg then
+    highlights.NamasteMRUIcon = { fg = special_fg }
+  else
+    highlights.NamasteMRUIcon = { link = "Special" }
+  end
+
+  -- MRU Path: Use string color
+  if string_fg then
+    highlights.NamasteMRUPath = { fg = string_fg }
+  else
+    highlights.NamasteMRUPath = { link = "String" }
+  end
+
+  -- MRU Number: Use number color
+  if number_fg then
+    highlights.NamasteMRUNumber = { fg = number_fg }
+  else
+    highlights.NamasteMRUNumber = { link = "Number" }
+  end
+
+  -- Sessions Title: Bold title color
+  if title_fg then
+    highlights.NamasteSessionsTitle = { fg = title_fg, bold = true }
+  else
+    highlights.NamasteSessionsTitle = { link = "Title" }
+  end
+
+  -- Sessions Icon: Use special color
+  if special_fg then
+    highlights.NamasteSessionsIcon = { fg = special_fg }
+  else
+    highlights.NamasteSessionsIcon = { link = "Special" }
+  end
+
+  -- Sessions Name: Use string color
+  if string_fg then
+    highlights.NamasteSessionsName = { fg = string_fg }
+  else
+    highlights.NamasteSessionsName = { link = "String" }
+  end
+
   return highlights
 end
 

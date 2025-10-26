@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-10-26
+
+### Added - Inspired by Popular Plugins
+- **MRU (Most Recently Used) Files**: Display recent files with quick access (vim-startify inspired)
+- **Number Key Shortcuts**: Press 1-9 to instantly open MRU files (dashboard-nvim style)
+- **Session Management**: Display and restore sessions (vim-startify inspired)
+- **Project Detection**: Auto-detect project root and display project name in footer
+- **Smart File Filtering**: MRU files prefer current directory, skip non-existent files
+- **Clickable Items**: Press Enter on MRU files or sessions to open them
+
+### Changed
+- Footer now shows project name instead of directory
+- Enhanced keybind system: Enter key works on sections, MRU files, and sessions
+- Added new highlight groups for MRU and session items
+
+### Configuration
+- `show_mru`: Enable/disable MRU files display (default: true)
+- `mru_limit`: Number of MRU files to show (default: 5)
+- `show_sessions`: Enable/disable sessions display (default: false)
+- `session_limit`: Number of sessions to show (default: 3)
+
 ## [1.3.0] - 2025-10-26
 
 ### Added

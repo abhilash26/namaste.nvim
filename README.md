@@ -13,6 +13,10 @@ A minimalist, **blazingly fast** Neovim welcome screen plugin built with perform
 - ⚡ **Performance Caching**: Smart caching for headers, sections, and color extraction
 - 🎨 **Customizable**: User-defined ASCII art and keybinds
 - 🌈 **Colored ASCII Art**: Header text uses theme-adaptive colors with bold emphasis
+- 📁 **MRU Files**: Display Most Recently Used files with quick access (vim-startify inspired)
+- 🔢 **Number Shortcuts**: Press 1-9 to instantly open MRU files (dashboard-nvim style)
+- 💾 **Session Management**: Display and restore sessions (vim-startify inspired)
+- 📂 **Project Detection**: Auto-detect project root from markers (.git, package.json, etc.)
 - 🔧 **Zero Dependencies**: Pure Neovim APIs, no external plugins required
 - 🌙 **Modern**: Built with Neovim 0.11+ features (extmarks, modern APIs)
 - 💡 **Smart Defaults**: Works great out of the box, auto-opens on startup
